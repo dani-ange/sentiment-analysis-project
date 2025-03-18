@@ -1,0 +1,37 @@
+# Fichiers générés par Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Dossiers d'environnements virtuels
+env/
+venv/
+.venv/
+.env/
+
+# Configurations d'éditeurs de code
+.vscode/
+.idea/
+
+# Fichiers de logs
+*.log
+*.out
+*.err
+
+# Fichiers temporaires
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Dépendances Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Fichiers de cache
+.cache/
+*.egg-info/
+.eggs/
+
+# Profiling data
+profiler.log
