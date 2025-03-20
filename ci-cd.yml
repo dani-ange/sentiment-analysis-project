@@ -1,0 +1,55 @@
+name: Sentiment Analysis Pipeline
+
+on: [push, pull_request,workflow_dispatch]  # Runs on push or PR to any branch
+
+jobs:
+  train_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3  # Clones repo
+
+    - name: Set Up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Install dependencies
+      run: pip install transformers[torch] accelerate>=0.26.0
+
+    - name: Train Model
+      run: python scripts/train.py
+
+    - name: Evaluate Model
+      run: python scripts/evaluate.py
+
+    - name: Run Tests
+      run: python scripts/test.py
+    
+    - name: Deploy to Hugging Face
+      env:
+        HF_TOKEN: ${{ secrets.HUGGINGFACE_API_TOKEN }}
+      run: |
+        huggingface-cli login --token $HF_TOKEN
+         # Set merge strategy to rebase
+         
+        # Unshallow the repository to prevent shallow update errors
+        git fetch --unshallow
+
+        git config pull.rebase true  
+
+        # Ensure local repository is up-to-date before pushing
+        git push --force https://danielle2003:$HF_TOKEN@huggingface.co/spaces/danielle2003/sentiment main
+        
+    - name: Upload Model Artifacts
+      #uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
+
+      with:
+        name: trained-model
+        path: models/
