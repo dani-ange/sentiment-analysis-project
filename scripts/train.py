@@ -20,11 +20,14 @@ model = AutoModelForSequenceClassification.from_pretrained(model_name, num_label
 # Training arguments
 training_args = TrainingArguments(
     output_dir="./models",
+    evaluation_strategy="epoch",  # Ensure this matches the save_strategy
+    save_strategy="epoch",  # Change this to "epoch" to match evaluation_strategy
+    load_best_model_at_end=True,  # Ensures best model is loaded
+    save_total_limit=2,  # Keep only the last 2 models to save space
     per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
     num_train_epochs=3,
-    evaluation_strategy="epoch",
-    save_steps=1000,
-    load_best_model_at_end=True,
+    weight_decay=0.01,
 )
 
 # Trainer setup
