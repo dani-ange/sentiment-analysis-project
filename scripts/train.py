@@ -3,7 +3,8 @@ from datasets import load_dataset
 
 # Load dataset (French dataset example: Allociné)
 dataset = load_dataset("allocine")
-
+dataset["train"] = dataset["train"].select(range(10))  # Train on 500 samples
+dataset["test"] = dataset["test"].select(range(5))  # Test on 200 samples
 # Load tokenizer
 model_name = "distilbert-base-multilingual-cased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -37,6 +38,7 @@ trainer = Trainer(
     train_dataset=dataset["train"],
     eval_dataset=dataset["test"],
 )
+
 
 # Train model
 trainer.train()
