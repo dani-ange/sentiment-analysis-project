@@ -4,7 +4,6 @@ from sklearn.metrics import accuracy_score, f1_score
 
 # Load dataset
 dataset = load_dataset("allocine")["test"]
-dataset["test"] = dataset["test"].select(range(5))  # Test on 200 samples
 
 # Load model and tokenizer
 model_path = "./models"
