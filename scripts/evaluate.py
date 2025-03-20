@@ -1,5 +1,5 @@
 import torch
-from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+from transformers import pipeline, AutoModelForSequenceClassification
 from datasets import load_dataset
 from sklearn.metrics import accuracy_score, f1_score
 
@@ -15,14 +15,14 @@ classifier = pipeline("text-classification", model=model_path, tokenizer=model_p
 
 # Load model to get dynamic label mapping
 model = AutoModelForSequenceClassification.from_pretrained(model_path)
-label_map = {v: f"LABEL_{k}" for k, v in model.config.label2id.items()}  # Ensure mapping is correct
+label_map = model.config.label2id  # Correct direct mapping {LABEL_X: int}
 
 # Get predictions
 predictions = [classifier(text["review"], truncation=True, max_length=512)[0]["label"] for text in dataset]
 labels = dataset["label"]
 
-# Convert labels
-predictions = [int(label_map[p].split("_")[-1]) for p in predictions]  # Convert back to int labels
+# Convert labels (direct mapping)
+predictions = [label_map[p] for p in predictions]  
 
 # Compute metrics
 accuracy = accuracy_score(labels, predictions)
