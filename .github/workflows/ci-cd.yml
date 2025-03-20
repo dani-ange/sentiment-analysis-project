@@ -1,6 +1,6 @@
 name: Sentiment Analysis Pipeline
 
-on: [push, pull_request]  # Runs on push or PR to any branch
+on: [push, pull_request,workflow_dispatch]  # Runs on push or PR to any branch
 
 jobs:
   train_and_test:
