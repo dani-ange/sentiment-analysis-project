@@ -19,6 +19,8 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Install dependencies
+      run: pip install transformers[torch] accelerate>=0.26.0
 
     - name: Train Model
       run: python scripts/train.py
