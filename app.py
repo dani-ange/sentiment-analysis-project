@@ -1,50 +1,83 @@
 import streamlit as st
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-import torch.nn.functional as F
+from transformers import pipeline
 
-# Load trained model & tokenizer
+# Set device (GPU if available)
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Custom Streamlit Styles
+st.markdown("""
+    <style>
+        /* Center everything */
+        .block-container {
+            max-width: 650px;
+            text-align: center;
+        }
+        
+        /* Title styling */
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FF4B4B;
+            text-shadow: 2px 2px 10px rgba(255, 75, 75, 0.5);
+        }
+
+        /* Text input styling */
+        .stTextArea textarea {
+            border-radius: 10px;
+            border: 2px solid #FF4B4B;
+            background-color: #1E1E1E;
+            color: white;
+            font-size: 16px;
+        }
+
+        /* Button styling */
+        div.stButton > button {
+            background-color: #FF4B4B;
+            color: white;
+            border-radius: 10px;
+            font-size: 18px;
+            padding: 10px 20px;
+            transition: 0.3s;
+        }
+        div.stButton > button:hover {
+            background-color: #E63E3E;
+        }
+
+        /* Result display */
+        .result {
+            font-size: 22px;
+            font-weight: bold;
+            color: #FF4B4B;
+            margin-top: 20px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Load Model from Hugging Face
 @st.cache_resource
 def load_model():
-    model = AutoModelForSequenceClassification.from_pretrained("models/sentiment_model")
-    tokenizer = AutoTokenizer.from_pretrained("models/sentiment_model")
-    return model, tokenizer
+    model_name = "distilbert-base-uncased-finetuned-sst-2-english"  # Replace with your actual HF model
+    classifier = pipeline("text-classification", model=model_name, tokenizer=model_name, device=0 if DEVICE == "cuda" else -1)
+    return classifier
 
-model, tokenizer = load_model()
+# Initialize model
+classifier = load_model()
 
 # Streamlit UI
-st.set_page_config(page_title="Sentiment Analyzer", page_icon="💬", layout="wide")
+st.markdown('<p class="title">Sentiment Analysis App 💬</p>', unsafe_allow_html=True)
+st.write("Enter a review below and let AI analyze its sentiment! 🚀")
 
-st.title("💬 Sentiment Analyzer")
-st.write("Analyze the sentiment of any text! Enter a sentence below and get an instant analysis.")
+# User Input
+text = st.text_area("Enter text:", "", height=150)
 
-user_input = st.text_area("Enter your text:", "")
+if st.button("Analyze"):
+    if text.strip():
+        result = classifier(text)[0]
+        sentiment = result['label']
+        confidence = result['score']
 
-if st.button("Analyze Sentiment"):
-    if user_input:
-        with st.spinner("Analyzing..."):
-            inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True)
-            outputs = model(**inputs)
-            probs = F.softmax(outputs.logits, dim=-1)
-            sentiment_index = torch.argmax(probs).item()
-            confidence = round(probs[0][sentiment_index].item() * 100, 2)
-
-        # Map index to label
-        labels = ["Negative", "Neutral", "Positive"]  # Adjust this based on your training labels
-        sentiment = labels[sentiment_index]
-
-        # Display result
-        st.subheader("🔍 Result")
-        if sentiment == "Positive":
-            st.success(f"😊 **Positive Sentiment** ({confidence}%)")
-        elif sentiment == "Negative":
-            st.error(f"😠 **Negative Sentiment** ({confidence}%)")
-        else:
-            st.warning(f"😐 **Neutral Sentiment** ({confidence}%)")
-
+        # Display sentiment result
+        st.markdown(f'<p class="result">Sentiment: {sentiment} ({confidence:.2%} confidence)</p>', unsafe_allow_html=True)
     else:
-        st.warning("⚠️ Please enter some text.")
-
-st.markdown("---")
-st.markdown("🔗 Built with Streamlit | Model: DistilBERT (Fine-tuned)")
-
+        st.warning("⚠️ Please enter some text!")
