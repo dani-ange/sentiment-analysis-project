@@ -21,13 +21,13 @@ jobs:
         pip install -r requirements.txt
 
     - name: Train Model
-      run: python train.py
+      run: python scripts/train.py
 
     - name: Evaluate Model
-      run: python evaluate.py
+      run: python scripts/evaluate.py
 
     - name: Run Tests
-      run: python test.py
+      run: python scripts/test.py
 
     - name: Upload Model Artifacts
       #uses: actions/upload-artifact@v3
